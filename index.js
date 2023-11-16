@@ -160,7 +160,7 @@ app.post("/register",async (req, res) => {
   const welLink = `https://hariiprasathkr.netlify.app`;
   const welcomemsg = {
     from: 'testhariikr@gmail.com',
-    to: user.email,
+    to: req.body.email,
     subject: 'ThankYou... :)',
     text: `You Account Created Successfully...!\n\n
         Continue to Website\n\n
