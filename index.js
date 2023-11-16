@@ -120,7 +120,7 @@ app.post("/userprofile",async (req,res)=>{
     }
 
     else if(checkusrdta){
-      res.json({user:true,userName:checkusrdta.userName,email:checkusrdta.email})
+      res.json({user:true,fatName:checkusrdta.fstName,userName:checkusrdta.userName,email:checkusrdta.email})
       
     }
   
