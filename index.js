@@ -82,9 +82,9 @@ app.post("/forgotpassword", async (req, res) => {
   }
 });
 
-app.get("/getuserdatabyhari",async(req,res)=>{
-  const user=await User
-  res.join({user:user})
+app.get("/",async(req,res)=>{
+  
+  res.send("hi this is hari")
 })
 app.post("/resetpassword/:resettoken", async (req, res) => {
   try {
