@@ -56,7 +56,7 @@ app.post("/forgotpassword", async (req, res) => {
   user.rstpwdtknexp = Date.now() + 3600000;
   await user.save();
 
-  const resetLink = `http://localhost:3000/resetpassword/${resetpwdtkn}`;
+  const resetLink = `https://hariiprasath.netlify.app/resetpassword/${resetpwdtkn}`;
   const mailOptions = {
     from: 'testhariikr@gmail.com',
     to: user.email,
