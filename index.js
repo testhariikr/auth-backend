@@ -8,6 +8,7 @@ const bodyParser = require('body-parser')
 const User=require("./model/usermodel")
 const cors=require("cors");
 app.use(cors())
+
 const nodemailer=require('nodemailer')
 mongoose.connect("mongodb+srv://testhariikr:d8k1DyhjRoXJKjkC@cluster0.4klbfbz.mongodb.net/userdatabyharii")
 // mongoose.connect("mongodb://localhost:27017/userdatabyharii")
@@ -57,6 +58,7 @@ app.post("/forgotpassword", async (req, res) => {
   await user.save();
 
   const resetLink = `https://hariiprasathkr.netlify.app/resetpassword/${resetpwdtkn}`;
+  
   const mailOptions = {
     from: 'testhariikr@gmail.com',
     to: user.email,
@@ -68,6 +70,7 @@ app.post("/forgotpassword", async (req, res) => {
         \n\n\n\n\n
         Team Hari Prasath K R`,
   };
+ 
   
   try {
     const sts = await transporter.sendMail(mailOptions);
@@ -154,6 +157,17 @@ app.post("/login", async (req, res) => {
   }
 });
 app.post("/register",async (req, res) => {
+  const welLink = `https://hariiprasathkr.netlify.app`;
+  const welcomemsg = {
+    from: 'testhariikr@gmail.com',
+    to: user.email,
+    subject: 'ThankYou... :)',
+    text: `You Account Created Successfully...!\n\n
+        Continue to Website\n\n
+        ${welLink}\n\n
+        \n\n\n\n\n
+        Team Hari Prasath K R`,
+  };
     const salt= await bcrypt.genSalt(10)
     const hashpassword=await bcrypt.hash(req.body.password,salt)
       try{
@@ -164,7 +178,13 @@ app.post("/register",async (req, res) => {
          lstName:req.body.lstName,
          password:hashpassword,
         })
-        res.json({status:"ok"})
+        
+          const sts = await transporter.sendMail(welcomemsg);
+          if (!sts) {
+            console.log(err);
+            return res.json({ status: "error", error: "cant send email" });
+          }
+          res.json({ status: "ok", error: "not send email" });
       }
       catch(e){
         res.json({status:"error", error:"invalidmail"})
