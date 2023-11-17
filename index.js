@@ -68,7 +68,7 @@ app.post("/forgotpassword", async (req, res) => {
         ${resetLink}\n\n
         If you did not request this, please ignore this email and your password will remain unchanged.\n
         \n\n\n\n\n
-        Team Hari Prasath K R`,
+        Team Harii Prasath K R`,
   };
  
   
@@ -167,7 +167,7 @@ app.post("/register",async (req, res) => {
     Proceed to the website by cliking the link\n\n
         ${welLink}\n\n
         \n\n\n\n\n
-        Team Hari Prasath K R`,
+        Team Harii Prasath K R`,
   };
     const salt= await bcrypt.genSalt(10)
     const hashpassword=await bcrypt.hash(req.body.password,salt)
