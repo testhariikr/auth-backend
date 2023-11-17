@@ -162,8 +162,8 @@ app.post("/register",async (req, res) => {
     from: 'testhariikr@gmail.com',
     to: req.body.email,
     subject: 'ThankYou... :)',
-    text: `You Account Created Successfully...!\n\n
-        Continue to Website\n\n
+    text: `Your account has been successfully created...!\n\n
+    Please proceed to the website\n\n
         ${welLink}\n\n
         \n\n\n\n\n
         Team Hari Prasath K R`,
