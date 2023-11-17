@@ -164,7 +164,7 @@ app.post("/register",async (req, res) => {
     subject: 'ThankYou... :)',
     text: `Welcome ${req.body.userName}...!\n\n 
     Your account has been successfully created ${req.body.fstName}...!\n\n
-    Please proceed to the website\n\n
+    Proceed to the website by cliking the link\n\n
         ${welLink}\n\n
         \n\n\n\n\n
         Team Hari Prasath K R`,
