@@ -9,7 +9,15 @@ const user = new mongoose.Schema({
     rstpwdtkn:{type:String},
     rstpwdtknexp:{type:Date},
     updatedAt:{date:Date,Description:String},
-    dob:{type:String}
+    dob:{type:String},
+    theme:{type:String,default:"dark"},
+    notes: [{
+        title:String,
+        content:String,
+        done:{type:Boolean,default:false},
+        createdAt:{type:Date ,default:Date.now()},
+        updatedAt:{date:Date,Description:String}
+    }]
 
 
     }

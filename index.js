@@ -10,8 +10,8 @@ const cors=require("cors");
 app.use(cors())
 
 const nodemailer=require('nodemailer')
-mongoose.connect("mongodb+srv://testhariikr:d8k1DyhjRoXJKjkC@cluster0.4klbfbz.mongodb.net/userdatabyharii")
-// mongoose.connect("mongodb://localhost:27017/userdatabyharii")
+ // mongoose.connect("mongodb+srv://testhariikr:d8k1DyhjRoXJKjkC@cluster0.4klbfbz.mongodb.net/userdatabyharii")
+ mongoose.connect("mongodb://localhost:27017/userdatabyharii")
 app.use(bodyParser.json());
 const transporter = nodemailer.createTransport({
   service: 'gmail',
@@ -20,9 +20,11 @@ const transporter = nodemailer.createTransport({
     pass: 'kdej lzeq onsy hdie',
   },
 });
+
 async function checkusr(req,res){
-  const recvtoken = req.headers['acesstoken']
+  
   try{
+    const recvtoken = req.headers['acesstoken']
     const decript=jwt.verify(recvtoken,"harii@1234")
     const email=decript.email
     const name=decript.userName
@@ -36,7 +38,6 @@ async function checkusr(req,res){
   }
   catch(e){
     console.log(e)
-    res.json({status:"error" , error:"invalidtoken"})
     return 2
   }
 }
@@ -84,7 +85,91 @@ app.post("/forgotpassword", async (req, res) => {
     res.status(500).json({ status: "error", error: "Internal server error" });
   }
 });
+async function updateNoteById(userId, noteId, updatedTitle, updatedContent,req,res) {
+  try {
+    const user = await User.findById(userId);
 
+    if (!user) {
+      throw new Error('User not found');
+    }
+    const noteToUpdate = user.notes.find(note => note._id.equals(noteId));
+
+    if (!noteToUpdate) {
+      throw new Error('Note not found');
+    }
+
+    noteToUpdate.title = updatedTitle;
+    noteToUpdate.content = updatedContent;
+    noteToUpdate.updatedAt = { date: new Date(), Description: 'Note updated' };
+
+    await user.save();
+
+    console.log('Note updated successfully');
+    res.json({ status: "ok", notes: (await checkusr(req,res)).notes});
+  } catch (error) {
+    console.error('Error updating note:', error.message);
+  }
+}
+async function deleteNoteById(userId, noteId,req,res) {
+  try {
+    const user = await User.findById(userId);
+
+    if (!user) {
+      throw new Error('User not found');
+    }
+
+    const noteIndex = user.notes.findIndex(note => note._id.equals(noteId));
+
+    if (noteIndex === -1) {
+      
+      res.json({ status: "error", error:"no notes found" });
+      throw new Error('Note not found');
+    }
+
+    user.notes.splice(noteIndex, 1);
+    await user.save();
+
+    res.json({ status: "ok", msg:"notes  deleted", notes: (await checkusr(req,res)).notes });
+    console.log('Note deleted successfully');
+    
+  } catch (error) {
+    console.error('Error deleting note:', error.message);
+  }
+}
+app.post("/upt",async(req,res)=>{
+  try {
+    const checkusrdta = await checkusr(req, res);
+    if (checkusrdta === 2) {
+      res.json({ user: false, error: "user can't find in the database" });
+    } else if (checkusrdta.notes[0]) {
+      updateNoteById(checkusrdta._id,req.body.dataid,req.body.title,req.body.content,req,res)
+      
+    }
+    else{
+      res.json({ status: "ok", notes: null});
+    }
+  } catch (e) {
+    console.log("someerror" + e);
+    res.status(500).json({ status: "error", error: "Internal server error" });
+  }
+  
+})
+app.post("/dlt",async(req,res)=>{
+  try {
+    const checkusrdta = await checkusr(req, res);
+    if (checkusrdta === 2) {
+      res.json({ user: false, error: "user can't find in the database" });
+    } else if (checkusrdta.notes[0]) {
+      deleteNoteById(checkusrdta._id,req.body.dataid,req,res)
+    }
+    else{
+      res.json({ status: "ok", notes: null});
+    }
+  } catch (e) {
+    console.log("someerror" + e);
+    res.status(500).json({ status: "error", error: "Internal server error" });
+  }
+})
 app.get("/",async(req,res)=>{
   
   res.send("hi this is hari")
@@ -113,6 +198,47 @@ app.post("/resetpassword/:resettoken", async (req, res) => {
     console.error("Reset password error:", error);
     res.status(500).json({ status: "error", error: "Internal server error" });
   }
+});
+app.post("/createnote", async (req, res) => {
+  try {
+    const checkusrdta = await checkusr(req, res);
+    if (checkusrdta === 2) {
+      res.json({ user: false, error: "user can't find in the database" });
+    } else if (checkusrdta) {
+      const title=req.body.title;
+      const content= req.body.content;
+      const newNote = {
+        title:title,
+        content:content
+      };
+      checkusrdta.notes.push(newNote);
+      await checkusrdta.save();
+      res.json({ status: "ok", notes: (await checkusr(req,res)).notes });
+    }
+  } catch (e) {
+    console.log("someerror" + e);
+    res.status(500).json({ status: "error", error: "Internal server error" });
+  }
+});
+async function getnote(req,res){
+  try {
+    const checkusrdta = await checkusr(req, res);
+    if (checkusrdta === 2) {
+      res.json({ user: false, error: "user can't find in the database" });
+    } else if (checkusrdta.notes[0]) {
+      res.json({ status: "ok", notes: checkusrdta.notes });
+    }
+    else{
+      res.json({ status: "ok", notes: null});
+    }
+  } catch (e) {
+    console.log("someerror" + e);
+    res.status(500).json({ status: "error", error: "Internal server error" });
+  }
+}
+// Get user's notes
+app.get("/usernotes", async (req, res) => {
+ const ststus=await getnote(req,res)
 });
 
 app.post("/userprofile",async (req,res)=>{
@@ -187,9 +313,16 @@ app.post("/register",async (req, res) => {
           }
           res.json({ status: "ok", error: "not send email" });
       }
-      catch(e){
-        res.json({status:"error", error:"invalidmail"})
-          console.log(e);
+      catch(error){
+        if (error.code === 11000) {
+          res.json({status:"error", error:"invalidmail"})
+          console.error("Duplicate key error:", error.message);
+        } else {
+          res.json({status:"error", error:"other error"})
+          console.error("Error:", error.message);
+        }
+        
+          
       }
     
      
