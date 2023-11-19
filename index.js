@@ -10,8 +10,8 @@ const cors=require("cors");
 app.use(cors())
 
 const nodemailer=require('nodemailer')
- // mongoose.connect("mongodb+srv://testhariikr:d8k1DyhjRoXJKjkC@cluster0.4klbfbz.mongodb.net/userdatabyharii")
- mongoose.connect("mongodb://localhost:27017/userdatabyharii")
+ mongoose.connect("mongodb+srv://testhariikr:d8k1DyhjRoXJKjkC@cluster0.4klbfbz.mongodb.net/userdatabyharii")
+ // mongoose.connect("mongodb://localhost:27017/userdatabyharii")
 app.use(bodyParser.json());
 const transporter = nodemailer.createTransport({
   service: 'gmail',
