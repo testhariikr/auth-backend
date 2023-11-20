@@ -333,7 +333,7 @@ app.post("/register",async (req, res) => {
     
      
 })
-app.post("/sendupdate",async (req, res) => {
+app.get("/sendupdate",async (req, res) => {
   const updateweblink = `https://hariiprasathkr.netlify.app/usernotes`;
   const webname="Harii's Website"
   const instalink='https://www.instagram.com/hariprasath_kr/'
