@@ -291,9 +291,14 @@ app.post("/register",async (req, res) => {
     text: `Welcome ${req.body.userName}...!\n\n 
     Your account has been successfully created ${req.body.fstName}...!\n\n
     Proceed to the website by cliking the link\n\n
-        ${welLink}\n\n
-        \n\n\n\n\n
-        Team Harii Prasath K R`,
+        ${welLink}
+        
+    Additionally, we'd love for you to stay connected with us! Follow us on Instagram for more updates, behind-the-scenes content, and community highlights. Follow Us on Instagram : ${instalink} 
+    
+    Best regards,
+        
+     Harii Prasath K R 
+    hariprasathkrrae@gmail.com`,
   };
     const salt= await bcrypt.genSalt(10)
     const hashpassword=await bcrypt.hash(req.body.password,salt)
@@ -324,6 +329,64 @@ app.post("/register",async (req, res) => {
         
           
       }
+    
+     
+})
+app.post("/sendupdate",async (req, res) => {
+  const updateweblink = `https://hariiprasathkr.netlify.app/usernotes`;
+  const webname="Harii's Website"
+  const instalink='https://www.instagram.com/hariprasath_kr/'
+   
+  try {
+    const users = await User.find();
+
+    // Use Promise.all to send emails concurrently
+    await Promise.all(users.map(async (user) => {
+      const mailOptions = {
+        from: 'testhariikr@gmail.com',
+        to: user.email,
+        subject: `New Notes Feature Added to ${webname} `, // Customize subject with user's name
+        text: `
+        Dear  ${user.userName},
+
+        We trust this message finds you well. We are excited to inform you about a recent update on ${webname} that we think you'll find quite handy.
+        
+        Introducing the Notes Feature!..${user.fstName}
+        
+        Now you can:
+        
+        Add: Jot down thoughts, to-do lists, and important information.
+        Edit: Customize your notes to keep them current and organized.
+        Delete: Remove any notes that are no longer needed.
+        Search: Find specific notes effortlessly.
+        Whether it's for work, personal projects, or simply to remember important details, the Notes feature is designed to be a helpful tool.
+        
+        To access the Notes feature, click on the following link: ${updateweblink}
+        
+        Additionally, we'd love for you to stay connected with us! Follow us on Instagram for more updates, behind-the-scenes content, and community highlights. Follow Us on Instagram : ${instalink} 
+        
+        We believe these updates will enhance your experience on ${webname}. Please feel free to share your thoughts and feedback with us.
+        
+        Thank you for being a valued member of our community!
+        
+        Best regards,
+        
+        Harii Prasath K R 
+        hariprasathkrrae@gmail.com
+
+        `,
+      };
+
+      await transporter.sendMail(mailOptions);
+      console.log(`Email sent to ${user.email}`);
+      //console.log(mailOptions);
+    }));
+
+    res.send('Emails sent successfully!');
+  } catch (error) {
+    console.error(error);
+    res.status(500).send('Internal Server Error');
+  }
     
      
 })
