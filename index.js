@@ -294,7 +294,7 @@ app.post("/register",async (req, res) => {
         ${welLink}
         
     Additionally, we'd love for you to stay connected with us! Follow us on Instagram for more updates, behind-the-scenes content, and community highlights. Follow Us on Instagram : ${instalink} 
-    
+
     Best regards,
         
      Harii Prasath K R 
@@ -345,7 +345,7 @@ app.post("/sendupdate",async (req, res) => {
       const mailOptions = {
         from: 'testhariikr@gmail.com',
         to: user.email,
-        subject: `New Notes Feature Added to ${webname} `, // Customize subject with user's name
+        subject: `${user.userName}, New Notes Feature Added to ${webname} `, // Customize subject with user's name
         text: `
         Dear  ${user.userName},
 
