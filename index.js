@@ -284,6 +284,7 @@ app.post("/login", async (req, res) => {
 });
 app.post("/register",async (req, res) => {
   const welLink = `https://hariiprasathkr.netlify.app`;
+  const instalink='https://www.instagram.com/hariprasath_kr/';
   const welcomemsg = {
     from: 'testhariikr@gmail.com',
     to: req.body.email,
