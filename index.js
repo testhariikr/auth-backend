@@ -7,11 +7,13 @@ const jwt=require("jsonwebtoken")
 const bodyParser = require('body-parser')
 const User=require("./model/usermodel")
 const cors=require("cors");
+const schedule = require('node-schedule');
+
 app.use(cors())
 
 const nodemailer=require('nodemailer')
- mongoose.connect("mongodb+srv://testhariikr:d8k1DyhjRoXJKjkC@cluster0.4klbfbz.mongodb.net/userdatabyharii")
- // mongoose.connect("mongodb://localhost:27017/userdatabyharii")
+ // mongoose.connect("mongodb+srv://testhariikr:d8k1DyhjRoXJKjkC@cluster0.4klbfbz.mongodb.net/userdatabyharii")
+mongoose.connect("mongodb://localhost:27017/userdatabyharii")
 app.use(bodyParser.json());
 const transporter = nodemailer.createTransport({
   service: 'gmail',
@@ -85,64 +87,14 @@ app.post("/forgotpassword", async (req, res) => {
     res.status(500).json({ status: "error", error: "Internal server error" });
   }
 });
-async function updateNoteById(userId, noteId, updatedTitle, updatedContent,req,res) {
-  try {
-    const user = await User.findById(userId);
 
-    if (!user) {
-      throw new Error('User not found');
-    }
-    const noteToUpdate = user.notes.find(note => note._id.equals(noteId));
-
-    if (!noteToUpdate) {
-      throw new Error('Note not found');
-    }
-
-    noteToUpdate.title = updatedTitle;
-    noteToUpdate.content = updatedContent;
-    noteToUpdate.updatedAt = { date: new Date(), Description: 'Note updated' };
-
-    await user.save();
-
-    console.log('Note updated successfully');
-    res.json({ status: "ok", notes: (await checkusr(req,res)).notes});
-  } catch (error) {
-    console.error('Error updating note:', error.message);
-  }
-}
-async function deleteNoteById(userId, noteId,req,res) {
-  try {
-    const user = await User.findById(userId);
-
-    if (!user) {
-      throw new Error('User not found');
-    }
-
-    const noteIndex = user.notes.findIndex(note => note._id.equals(noteId));
-
-    if (noteIndex === -1) {
-      
-      res.json({ status: "error", error:"no notes found" });
-      throw new Error('Note not found');
-    }
-
-    user.notes.splice(noteIndex, 1);
-    await user.save();
-
-    res.json({ status: "ok", msg:"notes  deleted", notes: (await checkusr(req,res)).notes });
-    console.log('Note deleted successfully');
-    
-  } catch (error) {
-    console.error('Error deleting note:', error.message);
-  }
-}
 app.post("/upt",async(req,res)=>{
   try {
     const checkusrdta = await checkusr(req, res);
     if (checkusrdta === 2) {
       res.json({ user: false, error: "user can't find in the database" });
     } else if (checkusrdta.notes[0]) {
-      updateNoteById(checkusrdta._id,req.body.dataid,req.body.title,req.body.content,req,res)
+      updateNoteById(checkusrdta._id,req.body.dataid,req.body.title,req.body.content,req.body.date,req.body.time,req,res)
       
     }
     else{
@@ -207,12 +159,16 @@ app.post("/createnote", async (req, res) => {
     } else if (checkusrdta) {
       const title=req.body.title;
       const content= req.body.content;
+      const time= req.body.time;
+      const date= req.body.date;
       const newNote = {
         title:title,
-        content:content
+        content:content,
+        reminder:{time:time,date:date}
       };
       checkusrdta.notes.push(newNote);
       await checkusrdta.save();
+      scheduleReminderJob(checkusrdta, newNote , newNote.reminder) 
       res.json({ status: "ok", notes: (await checkusr(req,res)).notes });
     }
   } catch (e) {
@@ -236,7 +192,6 @@ async function getnote(req,res){
     res.status(500).json({ status: "error", error: "Internal server error" });
   }
 }
-// Get user's notes
 app.get("/usernotes", async (req, res) => {
  const ststus=await getnote(req,res)
 });
@@ -332,15 +287,13 @@ app.post("/register",async (req, res) => {
     
      
 })
-app.post("/sendupdate",async (req, res) => {
+app.post("/sendupdatHGXFFGXNHGXe",async (req, res) => {
   const updateweblink = `https://hariiprasathkr.netlify.app/usernotes`;
   const webname="Harii's Website"
   const instalink='https://www.instagram.com/hariprasath_kr/'
    
   try {
     const users = await User.find();
-
-    // Use Promise.all to send emails concurrently
     await Promise.all(users.map(async (user) => {
       const mailOptions = {
         from: 'testhariikr@gmail.com',
@@ -390,5 +343,139 @@ app.post("/sendupdate",async (req, res) => {
     
      
 })
+
+
+
+async function updateNoteById(userId, noteId, updatedTitle, updatedContent,updateDate,updateTime,req,res) {
+  try {
+    const user = await User.findById(userId);
+
+    if (!user) {
+      throw new Error('User not found');
+    }
+    const noteToUpdate = await user.notes.find(note => note._id.equals(noteId));
+
+    if (!noteToUpdate) {
+      throw new Error('Note not found');
+    }
+
+    noteToUpdate.title = updatedTitle;
+    noteToUpdate.content = updatedContent;
+    noteToUpdate.reminder.date=updateDate;
+    noteToUpdate.reminder.time=updateTime;
+    noteToUpdate.updatedAt = { date: new Date(), Description: 'Note updated' };
+    await user.save();
+    const uptatednote=await user.notes.find(note => note._id.equals(noteId))
+    rescheduleReminderJob(user, uptatednote, uptatednote.reminder) 
+    console.log('Note updated successfully');
+    res.json({ status: "ok", notes: (await checkusr(req,res)).notes});
+  } catch (error) {
+    console.error('Error updating note:', error.message);
+  }
+}
+async function deleteNoteById(userId, noteId,req,res) {
+  try {
+    const user = await User.findById(userId);
+
+    if (!user) {
+      throw new Error('User not found');
+    }
+
+    const noteIndex = user.notes.findIndex(note => note._id.equals(noteId));
+
+    if (noteIndex === -1) {
+      
+      res.json({ status: "error", error:"no notes found" });
+      throw new Error('Note not found');
+    }
+      // Cancel the existing job using the stored job ID
+      if (user.notes[noteIndex].reminder.id) {
+          schedule.cancelJob(user.notes[noteIndex].reminder.id);
+      }
+
+    user.notes.splice(noteIndex, 1);
+    await user.save();
+
+    res.json({ status: "ok", msg:"notes  deleted", notes: (await checkusr(req,res)).notes });
+    console.log('Note deleted successfully');
+    
+  } catch (error) {
+    console.error('Error deleting note:', error.message);
+  }
+}
+
+
+
+
+
+
+async function scheduleReminderJob(user, note, reminder) {
+  try {
+      const reminderDateTime = new Date(reminder.date + ' ' + reminder.time);
+
+      // Schedule a job for the reminder
+      const job = schedule.scheduleJob(reminderDateTime, async () => {
+          // Check if the reminder is due
+          const currentDateTime = new Date();
+          if (currentDateTime >= reminderDateTime) {
+            console.log("sendinngggg")
+              // Send email to the user with the note details
+             const mailOptions = {
+                from: 'testhariikr@gmail.com',
+                to: user.email,
+                 subject: `Reminder: ${note.title} , ${user.userName} `,
+                  text: `Reminder: ${note.title}\n\n${note.content}\n\nScheduled time: ${reminder.date} ${reminder.time}`,
+               };
+
+               await transporter.sendMail(mailOptions);
+          }
+      });
+
+      // Store the scheduled job ID in the database for later reference
+      reminder.id = job && job.name;
+      await user.save();
+  } catch (error) {
+      console.error('Scheduling reminder job error:', error);
+  }
+}
+
+
+async function rescheduleReminderJob(user, note, reminder) {
+  try {
+      // Cancel the existing job using the stored job ID
+      if (reminder.id) {
+          schedule.cancelJob(reminder.id);
+      }
+
+      // Schedule a new job for the updated reminder
+      await scheduleReminderJob(user, note, reminder);
+  } catch (error) {
+      console.error('Rescheduling reminder job error:', error);
+  }
+}
+
+async function scheduleAllReminders() {
+  try {
+      const users = await User.find();
+
+      for (const user of users) {
+          for (const note of user.notes) {
+              
+                  if (!note.reminder.id) {
+                      // Schedule a job for a new reminder
+                      await scheduleReminderJob(user, note, note.reminder);
+                  } else {
+                      // Reschedule a job for an updated reminder
+                      await rescheduleReminderJob(user, note, note.reminder);
+                  }
+              
+          }
+      }
+  } catch (error) {
+      console.error('Scheduling all reminders error:', error);
+  }
+}
+
+scheduleAllReminders();
 
 app.listen(4000);

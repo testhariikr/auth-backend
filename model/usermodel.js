@@ -14,6 +14,12 @@ const user = new mongoose.Schema({
     notes: [{
         title:String,
         content:String,
+        reminder: {
+            date: String,
+            time: String,
+            id: String,
+        },
+
         done:{type:Boolean,default:false},
         createdAt:{type:Date ,default:Date.now()},
         updatedAt:{date:Date,Description:String}
