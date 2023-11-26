@@ -239,6 +239,7 @@ app.post("/login", async (req, res) => {
 });
 app.post("/register",async (req, res) => {
   const welLink = `https://hariiprasathkr.netlify.app`;
+  const instalink='https://www.instagram.com/hariprasath_kr/';
   const welcomemsg = {
     from: 'testhariikr@gmail.com',
     to: req.body.email,
@@ -424,7 +425,7 @@ async function scheduleReminderJob(user, note, reminder) {
                 from: 'testhariikr@gmail.com',
                 to: user.email,
                  subject: `Reminder: ${note.title} , ${user.userName} `,
-                  text: `Reminder: ${note.title}\n\n${note.content}\n\nScheduled time: ${reminder.date} ${reminder.time}`,
+                  text: `Reminder: ${note.title}\n\n${note.content}\n\n Scheduled time: ${reminder.date} ${reminder.time}`,
                };
 
                await transporter.sendMail(mailOptions);
