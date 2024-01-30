@@ -1,3 +1,4 @@
+
 const mongoose=require('mongoose');
 const user = new mongoose.Schema({
     userName:{type:String,require:true,unique:true},
@@ -10,6 +11,11 @@ const user = new mongoose.Schema({
     rstpwdtknexp:{type:Date},
     updatedAt:{date:Date,Description:String},
     dob:{type:String},
+    isAnyGroup:{type:Boolean,default:false},
+    groupName:[{
+        groupId:String,
+        groupName:String,
+    }],
     theme:{type:String,default:"dark"},
     notes: [{
         title:String,
@@ -24,8 +30,6 @@ const user = new mongoose.Schema({
         createdAt:{type:Date ,default:Date.now()},
         updatedAt:{date:Date,Description:String}
     }]
-
-
     }
     ,
     {
