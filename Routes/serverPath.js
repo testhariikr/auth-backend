@@ -1,5 +1,5 @@
 function serverPath() {
-    return "http://localhost:4000";
+    return "https://auth-backend-9794.onrender.com";
 }
 
 module.exports = {
